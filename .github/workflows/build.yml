@@ -14,12 +14,15 @@ jobs:
         run: |
           sed -i '' 's/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {\n        return true/' BrightIntosh/EntitlementHandler.swift
 
-      - name: Strip Signing Configurations from Project File
+      - name: Fix Repository Typo & Strip Signing 
         run: |
-          # Dynamically clear entitlements path, dev teams, and provisioning profiles inside the project configuration file
-          sed -i '' 's/CODE_SIGN_ENTITLEMENTS = [^;]*;/CODE_SIGN_ENTITLEMENTS = "";/g' BrightIntosh.xcodeproj/project.pbxproj
-          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' BrightIntosh.xcodeproj/project.pbxproj
-          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = [^;]*;/PROVISIONING_PROFILE_SPECIFIER = "";/g' BrightIntosh.xcodeproj/project.pbxproj
+          # 1. Entirely delete signing lines so Xcode doesn't look for an empty filename
+          sed -i '' '/CODE_SIGN_ENTITLEMENTS/d' BrightIntosh.xcodeproj/project.pbxproj
+          sed -i '' '/DEVELOPMENT_TEAM/d' BrightIntosh.xcodeproj/project.pbxproj
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' BrightIntosh.xcodeproj/project.pbxproj
+          
+          # 2. Fix the absurd "macOS 26.2" requirement
+          sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = 26.2;/MACOSX_DEPLOYMENT_TARGET = 14.0;/g' BrightIntosh.xcodeproj/project.pbxproj
 
       - name: Compile App with Ad-Hoc Signing
         run: |
