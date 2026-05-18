@@ -14,15 +14,23 @@ jobs:
         run: |
           sed -i '' 's/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {\n        return true/' BrightIntosh/EntitlementHandler.swift
 
-      - name: Fix Repository Typo & Strip Signing 
+      - name: Fix Repository Hack & Strip Signing 
         run: |
           # 1. Entirely delete signing lines so Xcode doesn't look for an empty filename
           sed -i '' '/CODE_SIGN_ENTITLEMENTS/d' BrightIntosh.xcodeproj/project.pbxproj
           sed -i '' '/DEVELOPMENT_TEAM/d' BrightIntosh.xcodeproj/project.pbxproj
           sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' BrightIntosh.xcodeproj/project.pbxproj
           
-          # 2. Fix the macOS requirement so it supports widgets (needs 15.0, not 14.0!)
+          # 2. Revert the developer's fake macOS 26.2 hack back down to 15.0
           sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = 26.2;/MACOSX_DEPLOYMENT_TARGET = 15.0;/g' BrightIntosh.xcodeproj/project.pbxproj
+
+      - name: Delete Unsupported iOS-Only Widget Code
+        run: |
+          # Wipe the unsupported ControlWidget file blank
+          echo "" > BrightIntosh/Widgets/BrightIntoshControlToggle.swift
+          
+          # Delete the line that tells the app to load the widget
+          sed -i '' '/BrightIntoshControlToggle()/d' BrightIntosh/Widgets/WidgetsBundle.swift
 
       - name: Compile App with Ad-Hoc Signing
         run: |
