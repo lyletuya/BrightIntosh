@@ -10,27 +10,33 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Compile App (Ignore Xcode Signing Rules)
+      - name: Unlock App Store Purchase Restriction
+        run: |
+          sed -i '' 's/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {\n        return true/' BrightIntosh/EntitlementHandler.swift
+
+      - name: Archive App (Bypasses Signing Errors)
         run: |
           xcodebuild -project BrightIntosh.xcodeproj \
                      -scheme BrightIntosh \
                      -configuration Release \
-                     CODE_SIGNING_ALLOWED=NO \
+                     -archivePath $PWD/build/BrightIntosh.xcarchive \
+                     CODE_SIGN_IDENTITY="-" \
                      CODE_SIGNING_REQUIRED=NO \
-                     OBJROOT=$PWD/build \
-                     SYMROOT=$PWD/build
+                     CODE_SIGNING_ALLOWED=NO \
+                     archive
 
-      - name: Manually Force Local Ad-Hoc Signature
+      - name: Extract Completed App Bundle
         run: |
-          codesign --force --deep --sign - build/Release/BrightIntosh.app
+          mkdir -p dist
+          cp -r build/BrightIntosh.xcarchive/Products/Applications/BrightIntosh.app dist/
 
       - name: Compress App Bundle
         run: |
-          cd build/Release
+          cd dist
           zip -r BrightIntosh.zip BrightIntosh.app
 
       - name: Upload Finished App
         uses: actions/upload-artifact@v4
         with:
           name: BrightIntosh-App
-          path: build/Release/BrightIntosh.zip
+          path: dist/BrightIntosh.zip
