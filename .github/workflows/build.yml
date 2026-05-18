@@ -14,19 +14,17 @@ jobs:
         run: |
           sed -i '' 's/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {\n        return true/' BrightIntosh/EntitlementHandler.swift
 
-      - name: Strip Security Entitlements & App Groups
-        run: |
-          # Removes the strict entitlement requirements from the Xcode project file
-          sed -i '' 's/CODE_SIGN_ENTITLEMENTS = [^;]*;/CODE_SIGN_ENTITLEMENTS = "";/g' BrightIntosh.xcodeproj/project.pbxproj
-
-      - name: Compile Main App (Skipping Widget)
+      - name: Compile Main App (Ad-Hoc Signing)
         run: |
           xcodebuild -project BrightIntosh.xcodeproj \
                      -target BrightIntosh \
                      -configuration Release \
-                     CODE_SIGN_IDENTITY="" \
-                     CODE_SIGNING_REQUIRED=NO \
-                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGN_IDENTITY="-" \
+                     CODE_SIGNING_REQUIRED=YES \
+                     CODE_SIGNING_ALLOWED=YES \
+                     CODE_SIGN_ENTITLEMENTS="" \
+                     DEVELOPMENT_TEAM="" \
+                     PROVISIONING_PROFILE_SPECIFIER="" \
                      SYMROOT=$PWD/build \
                      OBJROOT=$PWD/build
 
