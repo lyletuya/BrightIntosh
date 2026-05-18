@@ -1,7 +1,7 @@
 name: Cloud Build BrightIntosh
 
 on:
-  workflow_dispatch: # This adds a manual "Run" button for you
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,9 +10,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build App with Local Signatures
+      - name: Compile App (Ignore Xcode Signing Rules)
         run: |
-          xcodebuild -project BrightIntosh.xcodeproj -scheme BrightIntosh -configuration Release CODE_SIGN_IDENTITY="-" DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER="" OBJROOT=$PWD/build SYMROOT=$PWD/build
+          xcodebuild -project BrightIntosh.xcodeproj \
+                     -scheme BrightIntosh \
+                     -configuration Release \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     OBJROOT=$PWD/build \
+                     SYMROOT=$PWD/build
+
+      - name: Manually Force Local Ad-Hoc Signature
+        run: |
+          codesign --force --deep --sign - build/Release/BrightIntosh.app
 
       - name: Compress App Bundle
         run: |
