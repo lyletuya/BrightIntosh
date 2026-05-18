@@ -21,8 +21,8 @@ jobs:
           sed -i '' '/DEVELOPMENT_TEAM/d' BrightIntosh.xcodeproj/project.pbxproj
           sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' BrightIntosh.xcodeproj/project.pbxproj
           
-          # 2. Fix the absurd "macOS 26.2" requirement
-          sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = 26.2;/MACOSX_DEPLOYMENT_TARGET = 14.0;/g' BrightIntosh.xcodeproj/project.pbxproj
+          # 2. Fix the macOS requirement so it supports widgets (needs 15.0, not 14.0!)
+          sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = 26.2;/MACOSX_DEPLOYMENT_TARGET = 15.0;/g' BrightIntosh.xcodeproj/project.pbxproj
 
       - name: Compile App with Ad-Hoc Signing
         run: |
