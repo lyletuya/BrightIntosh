@@ -1,0 +1,26 @@
+name: Cloud Build BrightIntosh
+
+on:
+  workflow_dispatch: # This adds a manual "Run" button for you
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build App with Local Signatures
+        run: |
+          xcodebuild -project BrightIntosh.xcodeproj -scheme BrightIntosh -configuration Release CODE_SIGN_IDENTITY="-" DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER="" OBJROOT=$PWD/build SYMROOT=$PWD/build
+
+      - name: Compress App Bundle
+        run: |
+          cd build/Release
+          zip -r BrightIntosh.zip BrightIntosh.app
+
+      - name: Upload Finished App
+        uses: actions/upload-artifact@v4
+        with:
+          name: BrightIntosh-App
+          path: build/Release/BrightIntosh.zip
