@@ -14,29 +14,29 @@ jobs:
         run: |
           sed -i '' 's/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {\n        return true/' BrightIntosh/EntitlementHandler.swift
 
-      - name: Archive App (Bypasses Signing Errors)
+      - name: Strip Security Entitlements & App Groups
+        run: |
+          # Removes the strict entitlement requirements from the Xcode project file
+          sed -i '' 's/CODE_SIGN_ENTITLEMENTS = [^;]*;/CODE_SIGN_ENTITLEMENTS = "";/g' BrightIntosh.xcodeproj/project.pbxproj
+
+      - name: Compile Main App (Skipping Widget)
         run: |
           xcodebuild -project BrightIntosh.xcodeproj \
-                     -scheme BrightIntosh \
+                     -target BrightIntosh \
                      -configuration Release \
-                     -archivePath $PWD/build/BrightIntosh.xcarchive \
-                     CODE_SIGN_IDENTITY="-" \
+                     CODE_SIGN_IDENTITY="" \
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGNING_ALLOWED=NO \
-                     archive
-
-      - name: Extract Completed App Bundle
-        run: |
-          mkdir -p dist
-          cp -r build/BrightIntosh.xcarchive/Products/Applications/BrightIntosh.app dist/
+                     SYMROOT=$PWD/build \
+                     OBJROOT=$PWD/build
 
       - name: Compress App Bundle
         run: |
-          cd dist
+          cd build/Release
           zip -r BrightIntosh.zip BrightIntosh.app
 
       - name: Upload Finished App
         uses: actions/upload-artifact@v4
         with:
           name: BrightIntosh-App
-          path: dist/BrightIntosh.zip
+          path: build/Release/BrightIntosh.zip
