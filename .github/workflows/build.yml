@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-26 # Explicitly target the macOS Tahoe runner
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -14,15 +14,12 @@ jobs:
         run: |
           sed -i '' 's/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {/func isUnrestrictedUser(refresh: Bool = false) async throws -> Bool {\n        return true/' BrightIntosh/EntitlementHandler.swift
 
-      - name: Fix Repository Hack & Strip Signing 
+      - name: Strip Signing 
         run: |
-          # 1. Entirely delete signing lines so Xcode doesn't look for an empty filename
+          # Entirely delete signing lines so Xcode doesn't look for an empty filename
           sed -i '' '/CODE_SIGN_ENTITLEMENTS/d' BrightIntosh.xcodeproj/project.pbxproj
           sed -i '' '/DEVELOPMENT_TEAM/d' BrightIntosh.xcodeproj/project.pbxproj
           sed -i '' '/PROVISIONING_PROFILE_SPECIFIER/d' BrightIntosh.xcodeproj/project.pbxproj
-          
-          # 2. Revert the developer's fake macOS 26.2 hack back down to 15.0
-          sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = 26.2;/MACOSX_DEPLOYMENT_TARGET = 15.0;/g' BrightIntosh.xcodeproj/project.pbxproj
 
       - name: Delete Unsupported iOS-Only Widget Code
         run: |
