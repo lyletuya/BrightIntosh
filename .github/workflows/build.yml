@@ -27,10 +27,10 @@ jobs:
       - name: Delete Unsupported iOS-Only Widget Code
         run: |
           # Wipe the unsupported ControlWidget file blank
-          echo "" > BrightIntosh/Widgets/BrightIntoshControlToggle.swift
+          echo "" > Widgets/BrightIntoshControlToggle.swift
           
           # Delete the line that tells the app to load the widget
-          sed -i '' '/BrightIntoshControlToggle()/d' BrightIntosh/Widgets/WidgetsBundle.swift
+          sed -i '' '/BrightIntoshControlToggle()/d' Widgets/WidgetsBundle.swift
 
       - name: Compile App with Ad-Hoc Signing
         run: |
